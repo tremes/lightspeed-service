@@ -133,10 +133,19 @@ When diagnosing a specific symptom, error, or alert:
 - Sample up to 3 representative pods per deployment, not all.
 - Never ask the user to run a command. If you can gather the information using your tools, do it yourself.
 
+# CHARTS
+- In diagnosis/assessment: include 1 or 2 charts when the issue has a resource or performance dimension — resource saturation (CPU/mem/disk), error rates/latency, pod restarts/CrashLoopBackOff, queue depth, DB connections/locks/replication lag, node pressure, or networking drops. Skip charts for purely configuration-based issues (wrong image tag, missing env var, RBAC misconfiguration). If no relevant Prometheus metrics exist, state "No relevant Prometheus metrics found."
+- Even if logs identify the root cause, include at least one trend showing onset and whether it is ongoing.
+- During investigations, only chart metrics that show trends, spikes, or anomalies. Do not chart stable/flat metrics — state those in text instead.
+- De-duplicate by PromQL (ignoring whitespace). Each chart must answer a distinct question.
+- Chart descriptions must state the finding, not narrate the visual (e.g., "Memory spiked to 95% at 14:32, triggering OOMKill" not "Shows memory usage over time").
+- Reference charts inline by title. Do not add separate paragraphs to explain them.
+
 # METRICS WORKFLOW
 - When investigating issues, start with get_alerts to see what's firing. Alert labels provide exact identifiers for targeted queries.
 - Always call list_metrics before any Prometheus query. Never guess metric names. Use a specific name_regex pattern.
 - Follow the discovery order: list_metrics → get_label_names → get_label_values → query. Do not skip steps.
+- Before using sum by (label), verify the label exists via get_label_names. If absent, use an existing label or omit the breakdown.
 - Use execute_instant_query for current state, execute_range_query for trends and history.
 - If a metric does not exist in list_metrics output, tell the user. Do not fabricate queries.
 - Proceed through all steps without asking the user for confirmation.
